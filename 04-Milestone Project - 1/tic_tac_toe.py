@@ -61,22 +61,36 @@ def print_margin():
 def set_player_marks():
 	global PLAYER_MARKS
 	global PROMPTS
-	options = ALL_MARK_CHOICES
+	global PLAYING
+	options = ALL_MARK_CHOICES.copy()
 	prompt_len = max(map(len,PROMPTS.values()))
 	set_margin(prompt_len + 1)
 	print_margin()
 	choice = input("Select X or O for Player 1 ([X]|O): ").upper()
 	if DEBUG:
-		print(f'DEBUG: options = "{options}"')
-		print(f'DEBUG: choice  = "{choice}"')
+		print(f'DEBUG: (set_player_marks)[0]: options = "{options}"')
+		print(f'DEBUG: (set_player_marks)[0]: choice  = "{choice}"')
 	if choice in options:
+		if DEBUG:
+			print(f'DEBUG: (set_player_marks)[1]: options = "{options}"')
+			print(f'DEBUG: (set_player_marks)[1]: choice  = "{choice}"')
 		PLAYER_MARKS[1] = choice
 		del options[options.index(choice)]
 		PLAYER_MARKS[2] = options[0]
 	elif choice == "Q":
+		if DEBUG:
+			print(f'DEBUG: (set_player_marks)[2]:  options = "{options}"')
+			print(f'DEBUG: (set_player_marks)[2]:  choice  = "{choice}"')
+			print(f'DEBUG: (set_player_marks)[2a]: PLAYING = "{PLAYING}"')
 		PLAYING = False
+		if DEBUG:
+			print(f'DEBUG: (set_player_marks)[2b]: PLAYING = "{PLAYING}"')
 		return False
 	else:
+		if DEBUG:
+			print(f'DEBUG: (set_player_marks)[3]:  options = "{options}"')
+			print(f'DEBUG: (set_player_marks)[3]:  choice  = "{choice}"')
+			print(f'DEBUG: (set_player_marks)[3]:  PLAYING = "{PLAYING}"')
 		PLAYER_MARKS[1] = options[0]
 		PLAYER_MARKS[2] = options[1]
 	PROMPTS[1] = PROMPTS[0].replace("#","1").replace("%",PLAYER_MARKS[1])
@@ -85,19 +99,47 @@ def set_player_marks():
 
 def make_move(player):
 	global PLAY_BOARD
+	global PLAYING
+	move = 0
 	mark = PLAYER_MARKS[player]
 	prompt_len = max(map(len,PROMPTS.values()))
 	set_margin(prompt_len + 1)
 	print_margin()
 	rawmove = input(PROMPTS[player])
+	if DEBUG:
+		print(f'DEBUG: (make_move)[0]:   PLAYING = "{PLAYING}"')
+		print(f'DEBUG: (make_move)[0]:   rawmove = "{rawmove}"')
+		print(f'DEBUG: (make_move)[0]:   type(rawmove)       = "{type(rawmove)}"')
+		print(f'DEBUG: (make_move)[0]:   rawmove.isalpha()   = "{rawmove.isalpha()}"')
+		print(f'DEBUG: (make_move)[0]:   rawmove.isnumeric() = "{rawmove.isnumeric()}"')
+		print(f'DEBUG: (make_move)[0]:   rawmove.upper() = "{rawmove.upper()}"')
 	if rawmove.isalpha() and rawmove.upper() == "Q":
+		if DEBUG:
+			print(f'DEBUG: (make_move)[1]:   type(rawmove)       = "{type(rawmove)}"')
+			print(f'DEBUG: (make_move)[1]:   rawmove = "{rawmove}"')
+			print(f'DEBUG: (make_move)[1]:   rawmove.upper() = "{rawmove.upper()}"')
 		PLAYING = False
 		return False
 	if rawmove.isnumeric():
+		if DEBUG:
+			print(f'DEBUG: (make_move)[2]:   type(rawmove)       = "{type(rawmove)}"')
+			print(f'DEBUG: (make_move)[2]:   rawmove = "{rawmove}"')
+			print(f'DEBUG: (make_move)[2]:   rawmove.isnumeric() = "{rawmove.isnumeric()}"')
 		move = int(rawmove)
 		if move in range(1,len(PLAY_BOARD)) and PLAY_BOARD[move] == ' ':
+			if DEBUG:
+				print(f'DEBUG: (make_move)[3]:   type(rawmove)       = "{type(rawmove)}"')
+				print(f'DEBUG: (make_move)[3]:   rawmove             = "{rawmove}"')
+				print(f'DEBUG: (make_move)[3]:   rawmove.isnumeric() = "{rawmove.isnumeric()}"')
+				print(f'DEBUG: (make_move)[3]:   type(move)          = "{type(move)}"')
+				print(f'DEBUG: (make_move)[3]:   move                = "{move}"')
 			PLAY_BOARD[move] = mark
 			return True
+	if DEBUG:
+		print(f'DEBUG: (make_move)[4]:   PLAYING = "{PLAYING}"')
+		print(f'DEBUG: (make_move)[4]:   rawmove = "{rawmove}"')
+		print(f'DEBUG: (make_move)[4]:   rawmove.isalpha()   = "{rawmove.isalpha()}"')
+		print(f'DEBUG: (make_move)[4]:   rawmove.isnumeric() = "{rawmove.isnumeric()}"')
 	return False
 
 
@@ -117,7 +159,7 @@ def make_move(player):
 
 def three_equal(trio):
 	B = PLAY_BOARD
-	if DEBUG:
+	if DEBUG >= 3:
 		print(f'DEBUG: (three_equal): B[trio[0]] = B[{trio[0]}] = "{B[trio[0]]}"')
 		print(f'DEBUG: (three_equal): B[trio[1]] = B[{trio[1]}] = "{B[trio[1]]}"')
 		print(f'DEBUG: (three_equal): B[trio[2]] = B[{trio[2]}] = "{B[trio[2]]}"')
@@ -142,7 +184,7 @@ def check_for_line():
 def display_board(board=EMPTY_BOARD):
 	#def display_board():
 	scratch_board = board.copy()
-	if DEBUG:
+	if DEBUG >= 3:
 		print(f'DEBUG: (display_board): board: "{board}"')
 		print(f'DEBUG: (display_board): scratch_board: "{scratch_board}"')
 	row_labels = [ ]
@@ -200,19 +242,26 @@ while PLAYING:
 	WINNER = False
 	EMPTY_BOARD	= ['#',' ',' ',' ',' ',' ',' ',' ',' ',' ']
 	PLAY_BOARD = EMPTY_BOARD.copy()
-	if DEBUG: print(f'DEBUG: (main:PRE-display): PLAY_BOARD: "{PLAY_BOARD}"')
+	if DEBUG >= 3: print(f'DEBUG: (main:PRE-display): PLAY_BOARD: "{PLAY_BOARD}"')
 	player = 1
 	display_board(PLAY_BOARD)
 	set_player_marks()
-	if DEBUG: print(f'DEBUG: (main:POST-display): PLAY_BOARD: "{PLAY_BOARD}"')
+	if DEBUG >= 3: print(f'DEBUG: (main:POST-display): PLAY_BOARD: "{PLAY_BOARD}"')
 	while PLAYING and not WINNER and ' ' in PLAY_BOARD:
-		if DEBUG: print(f'DEBUG: (main:not_winner): player = "{player}"')
+		if DEBUG >= 2: 
+			print(f'DEBUG: (main:not_winner): player = "{player}"')
+			print(f'DEBUG: (main): PLAYING = "{PLAYING}"')
 		display_board(PLAY_BOARD)
 		if make_move(player):
 			if check_for_line():
 				WINNER = True
 				break
 			player = player % 2 + 1
+		if DEBUG:
+			print(f'DEBUG: (main:post-move)[0]:   PLAYING = "{PLAYING}"')
+			print(f'DEBUG: (main:post-move)[0]:   WINNER  = "{WINNER}"')
+	if not PLAYING:
+		exit()
 	display_board(PLAY_BOARD)
 	prompt_len = max(map(len,PROMPTS.values()))
 	set_margin(prompt_len + 1)
